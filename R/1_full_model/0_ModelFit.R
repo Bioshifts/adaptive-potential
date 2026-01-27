@@ -187,123 +187,23 @@ full <- glmmTMB(gam_velxGDxedge1,
 
 # Hierarchical Partitioning of Marginal R2 for GLMMs
 # Takes a while to calculate
-# full_model_hp <- glmm.hp(
-#     full,
-#     iv=list(vel="vel_abs_s",
-#             GD="GD_s",
-#             Param="Param",
-#             vel_Param="vel_abs_s:Param",
-#             GD_Param="GD_s:Param",
-#             vel_GD="vel_abs_s:GD_s",
-#             vel_GD_Param="vel_abs_s:GD_s:Param",
-#             Methods=c("LogNtempUnits", "LogExtent", "ContinuousGrain", "PrAb", "Quality")))
-# 
-# saveRDS(full_model_hp,
-#         "Data/R2part.RData")
+full_model_hp <- glmm.hp(
+    full,
+    iv=list(vel="vel_abs_s",
+            GD="GD_s",
+            Param="Param",
+            vel_Param="vel_abs_s:Param",
+            GD_Param="GD_s:Param",
+            vel_GD="vel_abs_s:GD_s",
+            vel_GD_Param="vel_abs_s:GD_s:Param",
+            Methods=c("LogNtempUnits", "LogExtent", "ContinuousGrain", "PrAb", "Quality")))
+
+saveRDS(full_model_hp,
+        "Data/R2part.RData")
 load("Data/R2part.RData")
 full_model_hp
 full_model_hp$r.squaredGLMM
 full_model_hp$lognormal
-
-# semi-partial R² (fixed-effects only)
-semi_partial_r2 <- function(full, drop_vars){
-    # drop_vars: character string of terms to remove
-    reduced_formula <- as.formula(
-        paste(". ~ . -", paste(drop_vars, collapse = " - "))
-    )
-    reduced <- update(full, reduced_formula)
-    r2_full <- r2(full)$R2_m
-    r2_reduced <- r2(reduced)$R2_m
-    r2_diff <- r2_full - r2_reduced
-    r2_diff <- pmax(r2_diff, 0)  # clamp negative
-    return(r2_diff)
-}
-
-
-# GD semi-partial R²
-r2_GD <- semi_partial_r2(full, c(
-    "vel_abs_s:GD_s:Param",
-    "vel_abs_s:GD_s",
-    "GD_s:Param",
-    "GD_s")
-)
-
-# Vel semi-partial R²
-r2_Vel <- semi_partial_r2(full, c(
-    "vel_abs_s:GD_s:Param",
-    "vel_abs_s:GD_s",
-    "vel_abs_s:Param",
-    "vel_abs_s")
-)
-
-# Param semi-partial R²
-r2_Param <- semi_partial_r2(full, c(
-    "vel_abs_s:GD_s:Param",
-    "vel_abs_s:Param",
-    "GD_s:Param",
-    "Param")
-)
-
-# Interactions
-r2_GD_Vel <- semi_partial_r2(full, c(
-    "vel_abs_s:GD_s",                                                                  "vel_abs_s:GD_s:Param"))
-r2_Vel_Param <- semi_partial_r2(full, c(
-    "vel_abs_s:Param",                                                                        "vel_abs_s:GD_s:Param"))
-r2_GD_Param <- semi_partial_r2(full, c(
-    "GD_s:Param",
-    "vel_abs_s:GD_s:Param"))
-r2_GD_Vel_Param <- semi_partial_r2(full, c(
-    "vel_abs_s:GD_s:Param"
-))
-
-# Covariates (methods)
-r2_methods <- semi_partial_r2(full, c(
-    "LogNtempUnits", "LogExtent", "ContinuousGrain", "PrAb", "Quality"
-))
-
-
-venn_values <- data.frame(GD = r2_GD,
-                          Vel = r2_Vel,
-                          Param = r2_Param,
-                          GD_Vel = r2_GD_Vel,
-                          Vel_Param = r2_Vel_Param,
-                          GD_Param = r2_GD_Param,
-                          GD_Vel_Param = r2_GD_Vel_Param,
-                          Methods = r2_methods)
-
-venn_values <- pmax(venn_values,0)
-
-# Clamp intersections
-venn_values_fixed <- venn_values
-venn_values_fixed["GD_Vel"] <- min(venn_values["GD_Vel"], venn_values["GD"], venn_values["Vel"])
-venn_values_fixed["GD_Param"] <- min(venn_values["GD_Param"], venn_values["GD"], venn_values["Param"])
-venn_values_fixed["Vel_Param"] <- min(venn_values["Vel_Param"], venn_values["Vel"], venn_values["Param"])
-venn_values_fixed["GD_Vel_Param"] <- min(venn_values["GD_Vel_Param"],
-                                         venn_values_fixed["GD_Vel"],
-                                         venn_values_fixed["GD_Param"],
-                                         venn_values_fixed["Vel_Param"])
-
-venn_values_fixed <- round(venn_values_fixed,3)
-
-library(eulerr)
-
-fit <- euler(c(
-    "GD" =  venn_values_fixed$GD,
-    "Vel" =  venn_values_fixed$Vel,
-    "Param" =  venn_values_fixed$Param,
-    "GD&Vel" =  venn_values_fixed$GD_Vel,
-    "GD&Param" =  venn_values_fixed$GD_Param,
-    "Vel&Param" =  venn_values_fixed$Vel_Param,
-    "GD&Vel&Param" =  venn_values_fixed$GD_Vel_Param,
-    "Methods" =  venn_values_fixed$Methods
-))
-
-plot(fit,
-     fills = c("skyblue", "pink", "lightgreen"),
-     alpha = 0.5,
-     labels = list(font = 2, cex = 1.2),  # bold labels
-     quantities = TRUE  # show values
-)
 
 
 ################################################################################
@@ -325,7 +225,7 @@ my.cluster2 <- parallel::makeCluster(
     nCPU, 
     type = "PSOCK"
 )
-clusterExport(cl = my.cluster2, varlist = c("s1","nB","glmmTMB","mydatatogo2","gam_velxGDxedge1","ranef","check_singularity"))
+clusterExport(cl = my.cluster2, varlist = c("s1","nB","glmmTMB","mydatatogo","gam_velxGDxedge1","ranef","check_singularity"))
 
 #register cluster
 doParallel::registerDoParallel(cl = my.cluster2)
@@ -710,31 +610,6 @@ gam_velxGDxedge1 <- as.formula(
     LogNtempUnits + LogExtent + ContinuousGrain + PrAb + Quality + 
     (1 | Class)")
 
-#computing weights
-mydatatogo2=mydatatogo
-mydatatogoCE=subset(mydatatogo2,Param=="O")
-x1=data.frame(table(mydatatogoCE$spp))
-x1=subset(x1,Freq>0)
-x1$weight_obs_spp=(1/x1$Freq)*(1/nrow(x1))
-mydatatogoCE=merge(mydatatogoCE,x1[,c(1,3)],by.x="spp",by.y="Var1")
-
-mydatatogoLE=subset(mydatatogo2,Param=="LE")
-x1=data.frame(table(mydatatogoLE$spp))
-x1=subset(x1,Freq>0)
-x1$weight_obs_spp=(1/x1$Freq)*(1/nrow(x1))
-mydatatogoLE=merge(mydatatogoLE,x1[,c(1,3)],by.x="spp",by.y="Var1")
-
-mydatatogoTE=subset(mydatatogo2,Param=="TE")
-x1=data.frame(table(mydatatogoTE$spp))
-x1=subset(x1,Freq>0)
-x1$weight_obs_spp=(1/x1$Freq)*(1/nrow(x1))
-mydatatogoTE=merge(mydatatogoTE,x1[,c(1,3)],by.x="spp",by.y="Var1")
-
-mydatatogoTE$weight_obs_spp=mydatatogoTE$weight_obs_spp*(1/3)
-mydatatogoCE$weight_obs_spp=mydatatogoCE$weight_obs_spp*(1/3)
-mydatatogoLE$weight_obs_spp=mydatatogoLE$weight_obs_spp*(1/3)
-mydatatogo2=rbind(mydatatogoTE,mydatatogoCE,mydatatogoLE)
-
 #fitting the model
 ##is latitude explaining residuals of the model? YES, not strongly but yes
 gamX1 <- glmmTMB(gam_velxGDxedge1, 
@@ -743,13 +618,14 @@ gamX1 <- glmmTMB(gam_velxGDxedge1,
                  REML=F,
                  data = mydatatogo2)
 summary(gamX1)
-MuMIn::r.squaredGLMM(gamX1)[1,] #37.9%
+MuMIn::r.squaredGLMM(gamX1)[2,] #48.8%
 
 
 p1=predict(gamX1,mydatatogo2,re.form=~0)
 plot(p1~log(mydatatogo2$SHIFT_abs))
 resid=log(mydatatogo2$SHIFT_abs)-p1
 hist(resid)
+plot(mydatatogo2$Lat,resid)
 m1=lmer(resid~Lat+(1|Class),data=mydatatogo2,weights=weight_obs_spp)
 MuMIn::r.squaredGLMM(m1)[1,] #0.6%
 summary(m1) #significant but low effect on residuals: residuals increase with residuals. In the present case it means that error tends to decrease with latitude
@@ -819,7 +695,8 @@ gamX3 <- glmmTMB(form2,
                  REML=F,
                  data = mydatatogo2)
 summary(gamX3) #latitude has a positive effect
-MuMIn::r.squaredGLMM(gamX3)[1,]  #37.9% => not better than the model without Latitude (gamX1 above)
+MuMIn::r.squaredGLMM(gamX3)[2,]  #48.8% => not better than the model without Latitude (gamX1 above)
+AIC(gamX3)
 
 coeff2=data.frame(summary(gamX3)$coeff$cond,
                   var=row.names(summary(gamX3)$coeff$cond))
@@ -842,7 +719,8 @@ gamX4 <- glmmTMB(form3,
                  data = mydatatogo2,
                  na.action = "na.fail")
 summary(gamX4) #latitude has a positive effect
-MuMIn::r.squaredGLMM(gamX4)[1,] #38%  => not better than the model without Latitude
+MuMIn::r.squaredGLMM(gamX4)[2,] #38%  => not better than the model without Latitude
+AIC(gamX4)
 
 coeff2=data.frame(summary(gamX4)$coeff$cond,
                   var=row.names(summary(gamX4)$coeff$cond))
