@@ -148,6 +148,7 @@ vect_div <- terra::vect(gen_div,
                         geom=c("Longitude","Latitude"),crs=crs(mundi))
 
 
+# Download BioShifts geodatabase from https://figshare.com/articles/dataset/BioShifts_a_global_geodatabase_of_climate-induced_species_redistribution_over_land_and_sea/7413365
 fgdb <- "C:/Users/brunn/ShadowDrive/CreateGeodatabaseBioShifts/Data/Study_Areas_v1/Study_Areas.gdb"
 fc_list <- terra::vector_layers(fgdb)
 fc_list <- fc_list[which(fc_list %in% unique(mydatatogo$ID))]
@@ -361,4 +362,9 @@ png(here(dir.out,"fig1.png"),unit="cm",width=16,height=13,res=300)#,width=547,he
 #plot_annotation(tag_levels = list(c('(a)','(b)','(c)',''))) # figure tags
 dev.off()
 
+pdf(here(dir.out,"fig1.pdf"),width=16*0.3937,height=13*0.3937)#,width=547,height=360
+(p1 + p2 + gg_leg )+
+    plot_layout(design=design,widths = c(1,0.2),heights=c(0.8,0.8))
+#plot_annotation(tag_levels = list(c('(a)','(b)','(c)',''))) # figure tags
+dev.off()
 

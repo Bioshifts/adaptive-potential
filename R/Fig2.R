@@ -328,4 +328,8 @@ png(here("Figs","fig2.png"),unit="cm",width=27,height=11,res=300)#,width=547,hei
 #plot_annotation(tag_levels = list(c('(a)','(b)','(c)',''))) # figure tags
 dev.off()
 
-
+pdf(here("Figs","fig2.pdf"),width=27*0.3937,height=11*0.3937)#,width=547,height=360
+(p1a + p2a + p3a + gg_lega ) + 
+    plot_layout( nrow = 1, widths = c(1,1,1,0.4)) #+ # common axes => add axis_titles = "collect"
+#plot_annotation(tag_levels = list(c('(a)','(b)','(c)',''))) # figure tags
+dev.off()
