@@ -1,6 +1,6 @@
 rm(list=ls())
 
-list.of.packages <- c("sf","raster","ggplot2","ggspatial","data.table","dplyr","tidyr","parallel","bdc","taxadb","traitdataform","pbapply","tidyverse","readxl","lme4","coefplot","sjPlot","sjmisc","effects","rgdal","maptools","rgeos","terra","MuMIn","rnaturalearthdata","lsmeans","GGally","tidyterra","httr","purrr","rlist","usethis","ggpubr","leaflet","here")
+list.of.packages <- c("sf","raster","ggplot2","ggspatial","data.table","dplyr","tidyr","parallel","pbapply","tidyverse","readxl","lme4","coefplot","sjPlot","sjmisc","effects","rgdal","maptools","rgeos","terra","rnaturalearthdata","lsmeans","GGally","tidyterra","purrr","rlist","usethis","ggpubr","here")
 
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 
@@ -15,7 +15,7 @@ dir.out=here("Figs") #to change. It's the repository where the results are saved
 
 
 # Load data
-mydataset <- read.csv2(here(dir.in,"gen_data_final_fonseca2.csv"),
+mydataset <- read.csv2(here(dir.in,"gen_data_final_fonseca.csv"),
                        sep=",",dec=".",h=T) 
 
 #Data selection

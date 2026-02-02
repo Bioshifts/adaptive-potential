@@ -3,10 +3,10 @@ gc();rm(list=ls())
 ################################################################################
 #required packages
 list.of.packages <- c(
-    "doParallel", "parallel","foreach","pdftools","plotly",
+    "doParallel", "parallel","foreach",
     "pbapply","dplyr", "tidyr", "data.table",
     "scales","effects","psych", 
-    "glmmTMB", "lme4", "lmerTest","here","rlist","partR2","VennDiagram",
+    "glmmTMB", "lme4", "lmerTest","here","rlist","partR2",
     "ggtext","gridExtra","grid","lattice","viridis","performance","MuMIn","glmm.hp") 
 
 
@@ -26,7 +26,7 @@ dir.in=here("Data") #to change accordingly to the location of the data
 dir.out=here("Output/full_model") #to change. It's the repository where the results are saved
 
 # Load data
-mydataset <- read.csv2(here(dir.in,"gen_data_final_fonseca2.csv"),
+mydataset <- read.csv2(here(dir.in,"gen_data_final_fonseca.csv"),
                        sep=",",dec=".",h=T) 
 
 #Data selection

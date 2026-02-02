@@ -22,7 +22,7 @@ if(!dir.exists(dir.out)){
 
 # Load data
 
-mydataset <- read.csv2(here(dir.in,"gen_data_final_fonseca2.csv"),
+mydataset <- read.csv2(here(dir.in,"gen_data_final_fonseca.csv"),
                        sep=",",dec=".",h=T) 
 
 # Data selection

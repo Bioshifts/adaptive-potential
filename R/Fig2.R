@@ -4,8 +4,7 @@ gc();rm(list=ls())
 #required packages
 list.of.packages <- c(
     "doParallel", "parallel","foreach","pdftools","plotly","here",
-    "pbapply","dplyr", "tidyr", "parallel",
-    "scales","effects","psych", "glmmTMB", "lme4", "lmerTest","here","rlist",
+    "pbapply","dplyr", "tidyr", "here","rlist",
     "ggtext","gridExtra","grid","lattice","viridis","performance","patchwork","cowplot","ggpubr","ggnewscale") 
 
 
@@ -24,7 +23,7 @@ if(!dir.exists(dir.out)){
 }
 # Load data
 # file path in GitHub: /adaptive-potential/Data
-mydataset <- read.csv2(here(dir.in,"gen_data_final_fonseca2.csv"),
+mydataset <- read.csv2(here(dir.in,"gen_data_final_fonseca.csv"),
                        sep=",",dec=".",h=T) 
 
 # Data selection
